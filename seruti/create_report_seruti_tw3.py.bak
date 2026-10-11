@@ -1,0 +1,678 @@
+import os, sys, subprocess
+import docx
+from docx.shared import Inches, Pt, RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+from docx.oxml import OxmlElement, parse_xml
+from docx.oxml.ns import nsdecls, qn
+
+BASE_DIR = r"c:\laragon\www\majapahit\seruti"
+OUTPUT_DOCX = os.path.join(BASE_DIR, "3509_Laporan_Penyelesaian_Seruti_TW3_2026.docx")
+OUTPUT_PDF = os.path.join(BASE_DIR, "3509_Laporan_Penyelesaian_Seruti_TW3_2026.pdf")
+LOGO_PATH = os.path.join(BASE_DIR, "logo_bps.png")
+IMG_INTI = os.path.join(BASE_DIR, "Triwulan 3 2026", "Dashboard Kuesioner Inti Seruti.png")
+IMG_MAK = os.path.join(BASE_DIR, "Triwulan 3 2026", "Dashboard Kuesioner MAK Seruti.png")
+
+# Color palette: BPS Navy Blue Theme
+COLOR_PRIMARY = RGBColor(0, 51, 102)     # #003366 Deep Navy
+COLOR_SECONDARY = RGBColor(51, 102, 153) # #336699 Slate Blue
+COLOR_DARK = RGBColor(33, 37, 41)        # #212529 Dark text
+HEX_PRIMARY = "003366"
+HEX_LIGHT_BG = "F0F4F8"
+HEX_ZEBRA = "F9FBFD"
+HEX_BORDER = "CCCCCC"
+
+def set_cell_background(cell, hex_color):
+    tcPr = cell._element.get_or_add_tcPr()
+    shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{hex_color}"/>')
+    tcPr.append(shd)
+
+def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
+    tcPr = cell._element.get_or_add_tcPr()
+    tcMar = parse_xml(f'''
+        <w:tcMar {nsdecls("w")}>
+            <w:top w:w="{top}" w:type="dxa"/>
+            <w:bottom w:w="{bottom}" w:type="dxa"/>
+            <w:left w:w="{left}" w:type="dxa"/>
+            <w:right w:w="{right}" w:type="dxa"/>
+        </w:tcMar>
+    ''')
+    tcPr.append(tcMar)
+
+def set_table_borders(table, color="CCCCCC", sz="4", val="single"):
+    tblPr = table._element.xpath('w:tblPr')
+    if tblPr:
+        borders = parse_xml(f'''
+            <w:tblBorders {nsdecls("w")}>
+                <w:top w:val="{val}" w:sz="{sz}" w:space="0" w:color="{color}"/>
+                <w:bottom w:val="{val}" w:sz="{sz}" w:space="0" w:color="{color}"/>
+                <w:insideH w:val="{val}" w:sz="{sz}" w:space="0" w:color="{color}"/>
+                <w:insideV w:val="none"/>
+                <w:left w:val="none"/>
+                <w:right w:val="none"/>
+            </w:tblBorders>
+        ''')
+        tblPr[0].append(borders)
+
+def format_cell(cell, text, bold=False, italic=False, size_pt=9.5, align=WD_ALIGN_PARAGRAPH.LEFT, color=COLOR_DARK):
+    cell.text = ""
+    p = cell.paragraphs[0]
+    p.alignment = align
+    p.paragraph_format.space_before = Pt(2)
+    p.paragraph_format.space_after = Pt(2)
+    p.paragraph_format.line_spacing = 1.05
+    run = p.add_run(text)
+    run.font.name = "Arial"
+    run.font.size = Pt(size_pt)
+    run.font.bold = bold
+    run.font.italic = italic
+    run.font.color.rgb = color
+    cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+def add_heading_styled(doc, text, level=1):
+    p = doc.add_paragraph()
+    p.paragraph_format.keep_with_next = True
+    if level == 1:
+        p.paragraph_format.space_before = Pt(14)
+        p.paragraph_format.space_after = Pt(4)
+        run = p.add_run(text)
+        run.font.name = "Arial"
+        run.font.size = Pt(12)
+        run.font.bold = True
+        run.font.color.rgb = COLOR_PRIMARY
+    elif level == 2:
+        p.paragraph_format.space_before = Pt(10)
+        p.paragraph_format.space_after = Pt(3)
+        run = p.add_run(text)
+        run.font.name = "Arial"
+        run.font.size = Pt(10.5)
+        run.font.bold = True
+        run.font.color.rgb = COLOR_SECONDARY
+    return p
+
+def add_paragraph_styled(doc, text, bold_prefix="", space_after=4):
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(space_after)
+    p.paragraph_format.line_spacing = 1.15
+    if bold_prefix:
+        r_pre = p.add_run(bold_prefix)
+        r_pre.font.name = "Arial"
+        r_pre.font.size = Pt(10)
+        r_pre.font.bold = True
+        r_pre.font.color.rgb = COLOR_DARK
+    run = p.add_run(text)
+    run.font.name = "Arial"
+    run.font.size = Pt(10)
+    run.font.color.rgb = COLOR_DARK
+    return p
+
+print("Starting document creation...")
+doc = docx.Document()
+
+# Page Margins: A4 Standard (Top: 2.5cm, Bottom: 2.5cm, Left: 2.8cm, Right: 2.5cm)
+for sec in doc.sections:
+    sec.page_width = Inches(8.27)
+    sec.page_height = Inches(11.69)
+    sec.top_margin = Inches(0.98)
+    sec.bottom_margin = Inches(0.98)
+    sec.left_margin = Inches(1.1)
+    sec.right_margin = Inches(0.98)
+
+# -------------------------------------------------------------
+# KOP SURAT RESMI
+# -------------------------------------------------------------
+tbl_kop = doc.add_table(rows=1, cols=2)
+tbl_kop.alignment = WD_TABLE_ALIGNMENT.CENTER
+tbl_kop.autofit = False
+tbl_kop.columns[0].width = Inches(1.2)
+tbl_kop.columns[1].width = Inches(5.0)
+
+cell_logo = tbl_kop.cell(0, 0)
+cell_text = tbl_kop.cell(0, 1)
+
+if os.path.exists(LOGO_PATH):
+    p_img = cell_logo.paragraphs[0]
+    p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run_img = p_img.add_run()
+    run_img.add_picture(LOGO_PATH, width=Inches(1.05))
+
+p_kop = cell_text.paragraphs[0]
+p_kop.alignment = WD_ALIGN_PARAGRAPH.LEFT
+p_kop.paragraph_format.line_spacing = 1.05
+
+r1 = p_kop.add_run("BADAN PUSAT STATISTIK KABUPATEN JEMBER\n")
+r1.font.name = "Arial"
+r1.font.size = Pt(12)
+r1.font.bold = True
+r1.font.color.rgb = COLOR_PRIMARY
+
+r2 = p_kop.add_run("TIM PENGOLAHAN DAN LAYANAN STATISTIK\n")
+r2.font.name = "Arial"
+r2.font.size = Pt(10.5)
+r2.font.bold = True
+r2.font.color.rgb = COLOR_SECONDARY
+
+r3 = p_kop.add_run("Jl. Sentot Prawirodirdjo No. 24, Telp. (0331) 485586, Jember 68131 | bps3509@bps.go.id")
+r3.font.name = "Arial"
+r3.font.size = Pt(8.5)
+r3.font.color.rgb = RGBColor(100, 100, 100)
+
+p_line = doc.add_paragraph()
+p_line.paragraph_format.space_before = Pt(4)
+p_line.paragraph_format.space_after = Pt(10)
+p_line_border = parse_xml(f'<w:pBdr {nsdecls("w")}><w:bottom w:val="single" w:sz="18" w:space="1" w:color="{HEX_PRIMARY}"/></w:pBdr>')
+p_line._p.get_or_add_pPr().append(p_line_border)
+
+# -------------------------------------------------------------
+# JUDUL LAPORAN
+# -------------------------------------------------------------
+p_title = doc.add_paragraph()
+p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p_title.paragraph_format.space_before = Pt(6)
+p_title.paragraph_format.space_after = Pt(2)
+r_t1 = p_title.add_run("LAPORAN KEGIATAN\n")
+r_t1.font.name = "Arial"
+r_t1.font.size = Pt(14)
+r_t1.font.bold = True
+r_t1.font.color.rgb = COLOR_PRIMARY
+
+p_sub = doc.add_paragraph()
+p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p_sub.paragraph_format.space_before = Pt(0)
+p_sub.paragraph_format.space_after = Pt(12)
+r_t2 = p_sub.add_run("PENYELESAIAN PENGOLAHAN SAMPEL DAN HASIL TABULASI\nSURVEI EKONOMI RUMAH TANGGA TRIWULANAN (SERUTI) TW III TAHUN 2026\nSTATUS PENYELESAIAN : 100,00% CLEAN")
+r_t2.font.name = "Arial"
+r_t2.font.size = Pt(11)
+r_t2.font.bold = True
+r_t2.font.color.rgb = COLOR_SECONDARY
+
+# -------------------------------------------------------------
+# TABEL IDENTITAS KEGIATAN
+# -------------------------------------------------------------
+meta_data = [
+    ("Kegiatan", "Penyelesaian Pengolahan Sampel SERUTI Triwulan III Tahun 2026"),
+    ("Satuan Kerja", "BPS Kabupaten Jember (Kode Wilayah: 3509)"),
+    ("Unit Kerja", "Tim Pengolahan dan Layanan Statistik"),
+    ("Periode Laporan", "Juli s.d. September 2026 (Posisi Cut-off: 11 Oktober 2026, Pukul 22:00:02 WIB)"),
+    ("Lokasi Pengolahan", "Kantor BPS Kabupaten Jember, Jawa Timur"),
+    ("Status Capaian Akhir", "100,00% Clean (280 Kuesioner Inti & 280 Kuesioner MAK Selesai Sempurna)")
+]
+
+tbl_meta = doc.add_table(rows=len(meta_data), cols=3)
+tbl_meta.alignment = WD_TABLE_ALIGNMENT.CENTER
+tbl_meta.autofit = False
+tbl_meta.columns[0].width = Inches(1.8)
+tbl_meta.columns[1].width = Inches(0.2)
+tbl_meta.columns[2].width = Inches(4.2)
+set_table_borders(tbl_meta, color="E0E0E0", sz="4")
+
+for i, (k, v) in enumerate(meta_data):
+    row = tbl_meta.rows[i]
+    set_cell_background(row.cells[0], HEX_LIGHT_BG if i % 2 == 0 else "FFFFFF")
+    set_cell_background(row.cells[1], HEX_LIGHT_BG if i % 2 == 0 else "FFFFFF")
+    set_cell_background(row.cells[2], HEX_LIGHT_BG if i % 2 == 0 else "FFFFFF")
+    set_cell_margins(row.cells[0], 60, 60, 100, 100)
+    set_cell_margins(row.cells[1], 60, 60, 50, 50)
+    set_cell_margins(row.cells[2], 60, 60, 100, 100)
+    format_cell(row.cells[0], k, bold=True, size_pt=9.5)
+    format_cell(row.cells[1], ":", bold=True, size_pt=9.5, align=WD_ALIGN_PARAGRAPH.CENTER)
+    format_cell(row.cells[2], v, bold=(i == len(meta_data)-1), size_pt=9.5, color=COLOR_PRIMARY if i == len(meta_data)-1 else COLOR_DARK)
+
+doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+# -------------------------------------------------------------
+# BAB I. PENDAHULUAN
+# -------------------------------------------------------------
+add_heading_styled(doc, "I. PENDAHULUAN", level=1)
+add_paragraph_styled(doc, 
+    "Survei Ekonomi Rumah Tangga Triwulanan (SERUTI) merupakan salah satu instrumen survei statistik strategis Badan Pusat Statistik (BPS) "
+    "yang didesain secara integratif untuk menyediakan data statistik sosial-ekonomi rumah tangga yang komprehensif, dinamis, dan berkesinambungan. "
+    "SERUTI mengukur secara rinci pola konsumsi dan pengeluaran rumah tangga, sumber-sumber pendapatan, transfer modal, pembentukan modal tetap bruto (PMTB), "
+    "serta posisi akumulasi aset finansial dan non-finansial rumah tangga di tingkat wilayah.")
+
+add_paragraph_styled(doc,
+    "Tahap pengolahan dokumen merupakan fase krusial dalam siklus bisnis survei statistik BPS, yang menjembatani pengumpulan data lapangan dengan tahap analisis dan diseminasi. "
+    "Pada Triwulan III Tahun 2026, target sampel SERUTI untuk wilayah BPS Kabupaten Jember mencakup 280 Rumah Tangga (RUTA) sampel yang tersebar di 28 Blok Sensus (NKS). "
+    "Setiap rumah tangga sampel diolah menggunakan dua instrumen utama, yaitu Kuesioner Inti dan Kuesioner MAK (Makanan, Minuman, dan Tembakau), sehingga menghasilkan total beban kerja "
+    "sebanyak 560 dokumen kuesioner.")
+
+add_paragraph_styled(doc,
+    "Laporan ini disusun secara komprehensif untuk mendokumentasikan pencapaian penyelesaian pengolahan data SERUTI Triwulan III 2026 yang telah berhasil mencapai target 100,00% Clean "
+    "tanpa adanya dokumen berstatus error maupun tertinggal (Kondisi cut-off sistem: 11 Oktober 2026, pukul 22:00:02 WIB). Selain capaian fisik pengolahan, laporan ini juga menyajikan "
+    "hasil analisis tabulasi data sosial-ekonomi rumah tangga Kabupaten Jember sebagai dasar evaluasi kewajaran data sebelum rilis agregat.")
+
+# -------------------------------------------------------------
+# BAB II. TARGET DAN REALISASI PENGOLAHAN
+# -------------------------------------------------------------
+add_heading_styled(doc, "II. TARGET DAN REALISASI PENGOLAHAN", level=1)
+add_paragraph_styled(doc,
+    "Pelaksanaan entri dan validasi data SERUTI Triwulan III 2026 dilaksanakan menggunakan aplikasi pengolahan berbasis web terintegrasi BPS (seruti.web.bps.go.id). "
+    "Berdasarkan hasil pemantauan pada server pengolahan, seluruh tahapan pendataan lapangan dan pengolahan telah terselesaikan dengan sempurna. "
+    "Rincian target dan realisasi dokumen disajikan pada tabel-tabel berikut:")
+
+# Tabel 1: Realisasi Dokumen
+p_t1 = doc.add_paragraph()
+p_t1.paragraph_format.space_before = Pt(6)
+p_t1.paragraph_format.space_after = Pt(2)
+r = p_t1.add_run("Tabel 1. Realisasi Penyelesaian Pengolahan per Jenis Dokumen SERUTI TW III 2026")
+r.font.name = "Arial"; r.font.size = Pt(9.5); r.font.bold = True
+
+t_dok = doc.add_table(rows=4, cols=6)
+t_dok.alignment = WD_TABLE_ALIGNMENT.CENTER
+set_table_borders(t_dok, color="B0C4DE", sz="6")
+headers_t1 = ["Jenis Dokumen", "Target (Dok)", "Realisasi Entri", "Clean", "Error / Belum", "Status Capaian"]
+widths_t1 = [Inches(1.8), Inches(0.9), Inches(1.0), Inches(0.9), Inches(1.0), Inches(1.2)]
+
+for j, h in enumerate(headers_t1):
+    cell = t_dok.cell(0, j)
+    cell.width = widths_t1[j]
+    set_cell_background(cell, HEX_PRIMARY)
+    set_cell_margins(cell, 80, 80, 100, 100)
+    format_cell(cell, h, bold=True, size_pt=9.5, align=WD_ALIGN_PARAGRAPH.CENTER, color=RGBColor(255, 255, 255))
+
+rows_t1_data = [
+    ("Kuesioner Inti", "280", "280 (100%)", "280 (100%)", "0 / 0", "100,00% Clean"),
+    ("Kuesioner MAK", "280", "280 (100%)", "280 (100%)", "0 / 0", "100,00% Clean"),
+    ("Total Dokumen", "560", "560 (100%)", "560 (100%)", "0 / 0", "100,00% Selesai")
+]
+
+for i, row_data in enumerate(rows_t1_data):
+    row = t_dok.rows[i+1]
+    bg = HEX_LIGHT_BG if i == 2 else (HEX_ZEBRA if i % 2 == 1 else "FFFFFF")
+    for j, val in enumerate(row_data):
+        cell = row.cells[j]
+        cell.width = widths_t1[j]
+        set_cell_background(cell, bg)
+        set_cell_margins(cell, 60, 60, 100, 100)
+        align = WD_ALIGN_PARAGRAPH.LEFT if j == 0 else WD_ALIGN_PARAGRAPH.CENTER
+        format_cell(cell, val, bold=(i == 2 or j == 5), size_pt=9.5, align=align, color=COLOR_PRIMARY if (i == 2 or j == 5) else COLOR_DARK)
+
+doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+# Tabel 2: Tahapan
+p_t2 = doc.add_paragraph()
+p_t2.paragraph_format.space_before = Pt(4)
+p_t2.paragraph_format.space_after = Pt(2)
+r = p_t2.add_run("Tabel 2. Ringkasan Progres per Tahapan Pengolahan SERUTI TW III 2026")
+r.font.name = "Arial"; r.font.size = Pt(9.5); r.font.bold = True
+
+t_tahap = doc.add_table(rows=5, cols=4)
+t_tahap.alignment = WD_TABLE_ALIGNMENT.CENTER
+set_table_borders(t_tahap, color="B0C4DE", sz="6")
+headers_t2 = ["No", "Tahapan Kegiatan", "Capaian (%)", "Keterangan Evaluasi"]
+widths_t2 = [Inches(0.5), Inches(2.2), Inches(1.1), Inches(2.8)]
+
+for j, h in enumerate(headers_t2):
+    cell = t_tahap.cell(0, j)
+    cell.width = widths_t2[j]
+    set_cell_background(cell, HEX_PRIMARY)
+    set_cell_margins(cell, 80, 80, 100, 100)
+    format_cell(cell, h, bold=True, size_pt=9.5, align=WD_ALIGN_PARAGRAPH.CENTER, color=RGBColor(255, 255, 255))
+
+rows_t2_data = [
+    ("1", "Pendataan Lapangan (PCL & PML)", "100,00%", "Seluruh 280 RUTA berhasil dicacah lengkap (Kode 1 = 280)"),
+    ("2", "Penerimaan & Batching Dokumen", "100,00%", "560 berkas kuesioner diterima lengkap di Seksi Pengolahan"),
+    ("3", "Entri Data ke Sistem Web", "100,00%", "560 dokumen selesai diinput ke seruti.web.bps.go.id"),
+    ("4", "Validasi, Cleaning, & Konsistensi", "100,00%", "560 dokumen 100% Clean; nihil error, anomali, maupun warning")
+]
+
+for i, row_data in enumerate(rows_t2_data):
+    row = t_tahap.rows[i+1]
+    bg = HEX_ZEBRA if i % 2 == 1 else "FFFFFF"
+    for j, val in enumerate(row_data):
+        cell = row.cells[j]
+        cell.width = widths_t2[j]
+        set_cell_background(cell, bg)
+        set_cell_margins(cell, 60, 60, 100, 100)
+        align = WD_ALIGN_PARAGRAPH.CENTER if j in [0, 2] else WD_ALIGN_PARAGRAPH.LEFT
+        format_cell(cell, val, bold=(j == 2), size_pt=9.5, align=align)
+
+doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+add_paragraph_styled(doc,
+    "Keberhasilan penyelesaian 100% dokumen Clean didorong oleh penerapan mekanisme pengawasan berjenjang dan monitoring interaktif "
+    "antara Pengawas Lapangan (PML) dan tim pengolahan di kantor BPS Kabupaten Jember. Setiap indikasi anomali isian belanja atau pendapatan langsung dikonfirmasi "
+    "kembali kepada responden di lapangan sebelum dokumen ditutup dengan status Clean.")
+
+# -------------------------------------------------------------
+# BAB III. RINCIAN PROGRES PER BLOK SENSUS (NKS)
+# -------------------------------------------------------------
+add_heading_styled(doc, "III. RINCIAN PROGRES PER BLOK SENSUS (NKS)", level=1)
+add_paragraph_styled(doc,
+    "Pengolahan SERUTI Triwulan III Tahun 2026 di Kabupaten Jember terdistribusi pada 28 Blok Sensus (Nomor Kode Sampel / NKS). "
+    "Masing-masing NKS memiliki alokasi 10 Rumah Tangga sampel dengan total 20 dokumen (10 Kuesioner Inti dan 10 Kuesioner MAK). "
+    "Rincian capaian pengolahan per blok sensus disajikan secara terperinci pada Tabel 3:")
+
+p_t3 = doc.add_paragraph()
+p_t3.paragraph_format.space_before = Pt(4)
+p_t3.paragraph_format.space_after = Pt(2)
+r = p_t3.add_run("Tabel 3. Rincian Capaian Pengolahan per Blok Sensus (NKS) SERUTI TW III 2026")
+r.font.name = "Arial"; r.font.size = Pt(9.5); r.font.bold = True
+
+nks_list = [
+    "00327", "00407", "00445", "01356", "01692", "02185", "03125", "03376", "04098", "04167", 
+    "04592", "50536", "51611", "51797", "52097", "52471", "53400", "54904", "55394", "56326", 
+    "56361", "56901", "57672", "58988", "59905", "60488", "60552", "61110"
+]
+
+t_nks = doc.add_table(rows=len(nks_list) + 2, cols=9)
+t_nks.alignment = WD_TABLE_ALIGNMENT.CENTER
+set_table_borders(t_nks, color="D0D7DE", sz="4")
+headers_t3 = ["No", "NKS", "Target", "INTI Clean", "INTI Err", "MAK Clean", "MAK Err", "Total Clean", "% Progres"]
+widths_t3 = [Inches(0.4), Inches(0.8), Inches(0.6), Inches(0.8), Inches(0.6), Inches(0.8), Inches(0.6), Inches(0.9), Inches(0.8)]
+
+for j, h in enumerate(headers_t3):
+    cell = t_nks.cell(0, j)
+    cell.width = widths_t3[j]
+    set_cell_background(cell, HEX_PRIMARY)
+    set_cell_margins(cell, 60, 60, 50, 50)
+    format_cell(cell, h, bold=True, size_pt=8.5, align=WD_ALIGN_PARAGRAPH.CENTER, color=RGBColor(255, 255, 255))
+
+for i, nks in enumerate(nks_list):
+    row = t_nks.rows[i+1]
+    bg = HEX_ZEBRA if i % 2 == 1 else "FFFFFF"
+    row_vals = [str(i+1), nks, "10", "10", "0", "10", "0", "20", "100%"]
+    for j, val in enumerate(row_vals):
+        cell = row.cells[j]
+        cell.width = widths_t3[j]
+        set_cell_background(cell, bg)
+        set_cell_margins(cell, 30, 30, 40, 40)
+        format_cell(cell, val, bold=(j in [1, 7, 8]), size_pt=8.5, align=WD_ALIGN_PARAGRAPH.CENTER)
+
+# Row Total
+row_tot = t_nks.rows[len(nks_list) + 1]
+tot_vals = ["", "TOTAL", "280", "280", "0", "280", "0", "560", "100,00%"]
+for j, val in enumerate(tot_vals):
+    cell = row_tot.cells[j]
+    cell.width = widths_t3[j]
+    set_cell_background(cell, HEX_LIGHT_BG)
+    set_cell_margins(cell, 50, 50, 50, 50)
+    format_cell(cell, val, bold=True, size_pt=8.5, align=WD_ALIGN_PARAGRAPH.CENTER, color=COLOR_PRIMARY)
+
+doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+# -------------------------------------------------------------
+# BAB IV. HASIL TABULASI DATA SOSIAL EKONOMI RUMAH TANGGA
+# -------------------------------------------------------------
+add_heading_styled(doc, "IV. HASIL TABULASI DATA SOSIAL EKONOMI RUMAH TANGGA", level=1)
+add_paragraph_styled(doc,
+    "Berdasarkan data kuesioner yang telah berstatus 100% Clean, sistem SERUTI menghasilkan serangkaian tabulasi ringkasan "
+    "indikator makro dan mikro ekonomi rumah tangga Kabupaten Jember. Tabulasi ini mencakup pengeluaran konsumsi menurut klasifikasi COICOP, "
+    "neraca pendapatan dan transfer modal, serta akumulasi aset/kekayaan rumah tangga.")
+
+# 4.1 Pengeluaran Konsumsi Menurut COICOP
+add_heading_styled(doc, "4.1 Pengeluaran Konsumsi per Kapita Menurut COICOP", level=2)
+add_paragraph_styled(doc,
+    "Pengeluaran konsumsi rumah tangga dikelompokkan berdasarkan Classification of Individual Consumption According to Purpose (COICOP). "
+    "Pada Triwulan III Tahun 2026, rata-rata total pengeluaran per kapita selama 3 bulan terakhir di Kabupaten Jember tercatat sebesar Rp 4.190.104,- "
+    "yang terdiri atas Konsumsi Akhir Rumah Tangga sebesar Rp 4.073.021,- (97,21%) dan Pengeluaran Lainnya (pajak, asuransi, upacara) sebesar Rp 117.083,- (2,79%). "
+    "Rincian perbandingan antar triwulan disajikan pada Tabel 4:")
+
+p_t4 = doc.add_paragraph()
+p_t4.paragraph_format.space_before = Pt(4)
+p_t4.paragraph_format.space_after = Pt(2)
+r = p_t4.add_run("Tabel 4. Perkembangan Pengeluaran Konsumsi per Kapita 3 Bulan Terakhir Menurut COICOP (Rupiah)")
+r.font.name = "Arial"; r.font.size = Pt(9.5); r.font.bold = True
+
+t_coicop = doc.add_table(rows=18, cols=5)
+t_coicop.alignment = WD_TABLE_ALIGNMENT.CENTER
+set_table_borders(t_coicop, color="B0C4DE", sz="6")
+headers_t4 = ["Kode", "Kelompok Pengeluaran (COICOP)", "TW I 2026", "TW II 2026", "TW III 2026"]
+widths_t4 = [Inches(0.6), Inches(3.0), Inches(1.1), Inches(1.1), Inches(1.1)]
+
+for j, h in enumerate(headers_t4):
+    cell = t_coicop.cell(0, j)
+    cell.width = widths_t4[j]
+    set_cell_background(cell, HEX_PRIMARY)
+    set_cell_margins(cell, 60, 60, 60, 60)
+    format_cell(cell, h, bold=True, size_pt=8.5, align=WD_ALIGN_PARAGRAPH.CENTER, color=RGBColor(255, 255, 255))
+
+coicop_rows = [
+    ("01", "Makanan dan minuman tidak beralkohol", "1.426.577", "1.463.307", "1.506.052"),
+    ("02", "Minuman beralkohol dan tembakau", "258.560", "248.291", "210.200"),
+    ("03", "Pakaian dan alas kaki", "40.350", "191.950", "57.883"),
+    ("04", "Perumahan, air, listrik, gas, & bahan bakar", "573.182", "593.661", "627.519"),
+    ("05", "Furnitur, perlengkapan RT & perbaikan", "178.624", "111.780", "133.630"),
+    ("06", "Kesehatan", "71.087", "90.982", "55.836"),
+    ("07", "Transportasi", "635.321", "311.141", "337.455"),
+    ("08", "Komunikasi", "145.905", "118.130", "142.363"),
+    ("09", "Rekreasi dan kebudayaan", "39.205", "28.688", "16.624"),
+    ("10", "Pendidikan", "60.175", "43.508", "107.998"),
+    ("11", "Penyediaan makan minum & akomodasi", "665.977", "726.699", "752.018"),
+    ("12", "Barang dan jasa lainnya", "134.838", "144.710", "125.443"),
+    ("20", "Subtotal Konsumsi Akhir Rumah Tangga", "4.229.801", "4.072.847", "4.073.021"),
+    ("31", "Pajak dan premi asuransi", "106.911", "94.814", "99.716"),
+    ("32", "Keperluan pesta & upacara/kenduri", "34.230", "43.859", "17.367"),
+    ("30", "Subtotal Pengeluaran Lainnya (31 + 32)", "141.141", "138.673", "117.083"),
+    ("40", "TOTAL PENGELUARAN (20 + 30)", "4.370.942", "4.211.520", "4.190.104")
+]
+
+for i, r_data in enumerate(coicop_rows):
+    row = t_coicop.rows[i+1]
+    is_sub = r_data[0] in ["20", "30", "40"]
+    bg = HEX_LIGHT_BG if is_sub else (HEX_ZEBRA if i % 2 == 1 else "FFFFFF")
+    for j, val in enumerate(r_data):
+        cell = row.cells[j]
+        cell.width = widths_t4[j]
+        set_cell_background(cell, bg)
+        set_cell_margins(cell, 35, 35, 50, 50)
+        align = WD_ALIGN_PARAGRAPH.CENTER if j == 0 else (WD_ALIGN_PARAGRAPH.RIGHT if j >= 2 else WD_ALIGN_PARAGRAPH.LEFT)
+        format_cell(cell, val, bold=is_sub, size_pt=8.5, align=align, color=COLOR_PRIMARY if is_sub else COLOR_DARK)
+
+doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+add_paragraph_styled(doc,
+    "Analisis pola konsumsi menunjukkan bahwa pengeluaran untuk 'Makanan dan minuman tidak beralkohol' (Kode 01) konsisten mendominasi keranjang konsumsi "
+    "dengan nilai Rp 1.506.052,- (35,94% dari total pengeluaran), mengalami tren kenaikan dibanding TW I (Rp 1,43 juta) dan TW II (Rp 1,46 juta). "
+    "Komponen 'Pendidikan' (Kode 10) meningkat tajam pada TW III menjadi Rp 107.998,- seiring momentum tahun ajaran baru sekolah. "
+    "Sementara itu, komponen 'Penyediaan makan minum dan akomodasi' (Kode 11) tetap tinggi di angka Rp 752.018,- mencerminkan mobilitas dan konsumsi makanan jadi di luar rumah yang tetap kuat.")
+
+# 4.2 Struktur Pendapatan dan Transfer Modal
+add_heading_styled(doc, "4.2 Pendapatan, Transfer Modal, dan PMTB Rumah Tangga", level=2)
+add_paragraph_styled(doc,
+    "Pada sisi penerimaan, SERUTI mencatat agregat pendapatan rumah tangga Kabupaten Jember yang meliputi upah/gaji, surplus usaha (mixed income), "
+    "pendapatan kepemilikan (property income), serta transfer dari pemerintah dan antar rumah tangga. Rincian agregat wilayah disajikan pada Tabel 5:")
+
+p_t5 = doc.add_paragraph()
+p_t5.paragraph_format.space_before = Pt(4)
+p_t5.paragraph_format.space_after = Pt(2)
+r = p_t5.add_run("Tabel 5. Struktur Pendapatan, Transfer Modal, dan PMTB Rumah Tangga Kabupaten Jember")
+r.font.name = "Arial"; r.font.size = Pt(9.5); r.font.bold = True
+
+t_pend = doc.add_table(rows=12, cols=4)
+t_pend.alignment = WD_TABLE_ALIGNMENT.CENTER
+set_table_borders(t_pend, color="B0C4DE", sz="6")
+headers_t5 = ["No", "Rincian Komponen Pendapatan & Transfer", "TW I (Triliun Rp)", "TW II (Triliun Rp)"]
+widths_t5 = [Inches(0.6), Inches(3.6), Inches(1.3), Inches(1.3)]
+
+for j, h in enumerate(headers_t5):
+    cell = t_pend.cell(0, j)
+    cell.width = widths_t5[j]
+    set_cell_background(cell, HEX_PRIMARY)
+    set_cell_margins(cell, 60, 60, 60, 60)
+    format_cell(cell, h, bold=True, size_pt=8.5, align=WD_ALIGN_PARAGRAPH.CENTER, color=RGBColor(255, 255, 255))
+
+pend_rows = [
+    ("1", "Upah dan Gaji Tenaga Kerja", "1,412", "1,459"),
+    ("2", "Surplus Usaha / Mixed Income Usaha Rumah Tangga", "1,809", "2,231"),
+    ("3", "Surplus Usaha dari Sewa Rumah Milik Sendiri", "0,061", "0,059"),
+    ("4", "Property Income (Pendapatan Kepemilikan) Diterima", "0,038", "0,002"),
+    ("5", "Property Income (Pendapatan Kepemilikan) Dibayar", "0,048", "0,033"),
+    ("6", "Transfer Diterima (Pemerintah: Rp 0,344 T, Antar RT: Rp 0,922 T)", "0,908", "1,337"),
+    ("7", "Transfer Dibayar (Pemerintah: Rp 0,025 T, Antar RT: Rp 0,485 T)", "0,395", "0,606"),
+    ("8", "TOTAL PENDAPATAN DISPOSABEL RUMAH TANGGA", "3,785", "4,448"),
+    ("9", "Transfer Modal Diterima / Dibayar", "0,000", "0,000"),
+    ("10", "Pembentukan Modal Tetap Bruto (PMTB) Rumah Tangga", "0,149", "0,144"),
+    ("-", "Total Pendapatan Disposabel Per Kapita (Rupiah)", "Rp 4.812.880", "Rp 5.546.428")
+]
+
+for i, r_data in enumerate(pend_rows):
+    row = t_pend.rows[i+1]
+    is_main = r_data[0] in ["8", "-"]
+    bg = HEX_LIGHT_BG if is_main else (HEX_ZEBRA if i % 2 == 1 else "FFFFFF")
+    for j, val in enumerate(r_data):
+        cell = row.cells[j]
+        cell.width = widths_t5[j]
+        set_cell_background(cell, bg)
+        set_cell_margins(cell, 35, 35, 50, 50)
+        align = WD_ALIGN_PARAGRAPH.CENTER if j == 0 else (WD_ALIGN_PARAGRAPH.RIGHT if j >= 2 else WD_ALIGN_PARAGRAPH.LEFT)
+        format_cell(cell, val, bold=is_main, size_pt=8.5, align=align, color=COLOR_PRIMARY if is_main else COLOR_DARK)
+
+doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+add_paragraph_styled(doc,
+    "Total pendapatan disposabel rumah tangga di Kabupaten Jember menunjukkan penguatan signifikan, mencapai Rp 4,448 Triliun pada TW II "
+    "(atau rata-rata Rp 5.546.428,- per kapita). Penopang utama pendapatan masyarakat adalah sektor informal/usaha rumah tangga (Surplus Usaha/Mixed Income) "
+    "sebesar Rp 2,231 Triliun (50,16%), diikuti oleh upah/gaji formal sebesar Rp 1,459 Triliun (32,80%) serta transfer sosial antar rumah tangga dan pemerintah.")
+
+# 4.3 Posisi Aset Finansial dan Non Finansial
+add_heading_styled(doc, "4.3 Akumulasi Aset Finansial, Inventori, dan Aset Non Finansial", level=2)
+add_paragraph_styled(doc,
+    "SERUTI menyajikan potret kekayaan (wealth accumulation) rumah tangga yang menjadi bantalan ketahanan ekonomi keluarga. "
+    "Tabel 6 menyajikan posisi akhir inventori dan aset rumah tangga Kabupaten Jember hingga Triwulan III Tahun 2026:")
+
+p_t6 = doc.add_paragraph()
+p_t6.paragraph_format.space_before = Pt(4)
+p_t6.paragraph_format.space_after = Pt(2)
+r = p_t6.add_run("Tabel 6. Posisi Akhir Aset Finansial dan Non Finansial Rumah Tangga (Triliun Rupiah)")
+r.font.name = "Arial"; r.font.size = Pt(9.5); r.font.bold = True
+
+t_aset = doc.add_table(rows=14, cols=5)
+t_aset.alignment = WD_TABLE_ALIGNMENT.CENTER
+set_table_borders(t_aset, color="B0C4DE", sz="6")
+headers_t6 = ["No", "Rincian Kategori Aset", "TW I", "TW II", "TW III"]
+widths_t6 = [Inches(0.5), Inches(3.3), Inches(1.0), Inches(1.0), Inches(1.0)]
+
+for j, h in enumerate(headers_t6):
+    cell = t_aset.cell(0, j)
+    cell.width = widths_t6[j]
+    set_cell_background(cell, HEX_PRIMARY)
+    set_cell_margins(cell, 60, 60, 60, 60)
+    format_cell(cell, h, bold=True, size_pt=8.5, align=WD_ALIGN_PARAGRAPH.CENTER, color=RGBColor(255, 255, 255))
+
+aset_rows = [
+    ("1", "Posisi Akhir Inventori Usaha RT", "1,298", "1,288", "0,510"),
+    ("2", "Aset Finansial - Uang Tunai", "0,152", "0,138", "0,227"),
+    ("3", "Aset Finansial - Simpanan Bank", "0,648", "0,510", "0,399"),
+    ("4", "Aset Finansial - Simpanan Koperasi", "0,011", "0,002", "0,315"),
+    ("5", "Aset Finansial - Simpanan Lainnya (Sekolah, RT)", "0,065", "0,124", "0,116"),
+    ("6", "Aset Finansial - Piutang & Kredit Barang", "0,056", "0,013", "0,026"),
+    ("7", "Aset Finansial - Iuran Arisan Rumah Tangga", "2,182", "2,269", "2,333"),
+    ("8", "Aset Finansial - Modal Perusahaan non Hukum", "0,500", "0,250", "0,000"),
+    ("9", "Subtotal Likuiditas Aset Finansial (2 s.d. 8)", "3,614", "3,306", "3,416"),
+    ("10", "Non Produced Asset (Nilai Lahan / Tanah)", "0,132", "0,065", "0,091"),
+    ("11", "Aset Non Finansial - Bangunan Tempat Tinggal", "31,557", "29,377", "26,988"),
+    ("12", "Aset Non Finansial - Bangunan Usaha", "19,979", "20,193", "18,852"),
+    ("13", "Aset Non Finansial - Aset Non Bangunan", "1,091", "1,811", "1,346")
+]
+
+for i, r_data in enumerate(aset_rows):
+    row = t_aset.rows[i+1]
+    is_sub = r_data[0] in ["9", "11", "12"]
+    bg = HEX_LIGHT_BG if is_sub else (HEX_ZEBRA if i % 2 == 1 else "FFFFFF")
+    for j, val in enumerate(r_data):
+        cell = row.cells[j]
+        cell.width = widths_t6[j]
+        set_cell_background(cell, bg)
+        set_cell_margins(cell, 35, 35, 50, 50)
+        align = WD_ALIGN_PARAGRAPH.CENTER if j == 0 else (WD_ALIGN_PARAGRAPH.RIGHT if j >= 2 else WD_ALIGN_PARAGRAPH.LEFT)
+        format_cell(cell, val, bold=is_sub, size_pt=8.5, align=align, color=COLOR_PRIMARY if is_sub else COLOR_DARK)
+
+doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+add_paragraph_styled(doc,
+    "Temuan menarik pada struktur aset rumah tangga Kabupaten Jember adalah tingginya ketergantungan pada instrumen keuangan berbasis komunitas/komunal. "
+    "Iuran arisan rumah tangga mencapai Rp 2,333 Triliun pada TW III 2026, melampaui simpanan perbankan formal (Rp 0,399 Triliun). "
+    "Selain itu, terjadi kenaikan signifikan pada simpanan koperasi dari Rp 0,002 T (TW II) menjadi Rp 0,315 T (TW III). "
+    "Pada aset non-finansial, aset properti tempat tinggal (Rp 26,988 Triliun) dan properti usaha (Rp 18,852 Triliun) menjadi fondasi kekayaan fisik terbesar masyarakat.")
+
+# -------------------------------------------------------------
+# BAB V. KESIMPULAN DAN TINDAK LANJUT
+# -------------------------------------------------------------
+add_heading_styled(doc, "V. KESIMPULAN DAN TINDAK LANJUT", level=1)
+add_paragraph_styled(doc,
+    "1. Capaian Pengolahan 100,00% Clean: BPS Kabupaten Jember telah menyelesaikan 100% tahapan entri dan validasi data SERUTI Triwulan III Tahun 2026 "
+    "pada 28 Blok Sensus (280 RUTA) dengan total 560 dokumen (280 Inti dan 280 MAK) berstatus Clean tanpa ada error maupun backlog dokumen.")
+
+add_paragraph_styled(doc,
+    "2. Kualitas dan Konsistensi Data Terjaga: Hasil uji petik dan verifikasi menunjukkan konsistensi yang sangat baik antara kuesioner konsumsi (MAK) "
+    "dengan kuesioner profil ekonomi rumah tangga (Inti). Rata-rata pengeluaran konsumsi per kapita sebesar Rp 4,19 juta sejalan dengan profil pendapatan disposabel dan likuiditas aset rumah tangga.")
+
+add_paragraph_styled(doc,
+    "3. Rekomendasi Tindak Lanjut Teknis:")
+add_paragraph_styled(doc, "a. Melakukan backup berkala database entri lokal dan memastikan sinkronisasi data master di server BPS RI telah terkunci secara sempurna.")
+add_paragraph_styled(doc, "b. Menyerahkan hasil tabulasi agregat kepada Fungsi Neraca Wilayah dan Analisis Statistik (Nerwilis) BPS Kabupaten Jember sebagai sumber data penyusunan PDRB Pengeluaran Triwulanan.")
+add_paragraph_styled(doc, "c. Menyiapkan administrasi penutupan kegiatan pengolahan SERUTI TW III dan menyusun persiapan alokasi petugas untuk pelaksanaan SERUTI Triwulan IV Tahun 2026.")
+
+# -------------------------------------------------------------
+# PENGESAHAN LAPORAN
+# -------------------------------------------------------------
+doc.add_paragraph().paragraph_format.space_after = Pt(12)
+
+tbl_ttd = doc.add_table(rows=1, cols=2)
+tbl_ttd.alignment = WD_TABLE_ALIGNMENT.CENTER
+tbl_ttd.columns[0].width = Inches(3.5)
+tbl_ttd.columns[1].width = Inches(3.2)
+
+cell_kiri = tbl_ttd.cell(0, 0)
+cell_kanan = tbl_ttd.cell(0, 1)
+
+p_ttd = cell_kanan.paragraphs[0]
+p_ttd.alignment = WD_ALIGN_PARAGRAPH.LEFT
+p_ttd.paragraph_format.line_spacing = 1.15
+
+r_ttd1 = p_ttd.add_run("Jember, 12 Oktober 2026\nKetua Tim Pengolahan dan Layanan Statistik\nBPS Kabupaten Jember\n\n\n\n\n")
+r_ttd1.font.name = "Arial"
+r_ttd1.font.size = Pt(10)
+
+r_ttd2 = p_ttd.add_run("NANANG PAMUNGKAS, A.Md., S.M.\n")
+r_ttd2.font.name = "Arial"
+r_ttd2.font.size = Pt(10.5)
+r_ttd2.font.bold = True
+r_ttd2.underline = True
+
+r_ttd3 = p_ttd.add_run("NIP. 198505172011011018")
+r_ttd3.font.name = "Arial"
+r_ttd3.font.size = Pt(10)
+
+# -------------------------------------------------------------
+# LAMPIRAN: DOKUMENTASI MONITORING
+# -------------------------------------------------------------
+doc.add_page_break()
+add_heading_styled(doc, "LAMPIRAN DOKUMENTASI MONITORING SISTEM SERUTI", level=1)
+add_paragraph_styled(doc,
+    "Berikut merupakan bukti tangkapan layar monitoring resmi pada aplikasi web pengolahan SERUTI 2026 (seruti.web.bps.go.id) "
+    "untuk wilayah BPS Kabupaten Jember per tanggal 11 Oktober 2026 kondisi pukul 22:00:02 WIB:")
+
+if os.path.exists(IMG_INTI):
+    p_img1 = doc.add_paragraph()
+    p_img1.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_img1.paragraph_format.space_before = Pt(8)
+    p_img1.paragraph_format.space_after = Pt(2)
+    p_img1.add_run().add_picture(IMG_INTI, width=Inches(6.2))
+    
+    p_cap1 = doc.add_paragraph()
+    p_cap1.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_cap1.paragraph_format.space_before = Pt(0)
+    p_cap1.paragraph_format.space_after = Pt(14)
+    r_c1 = p_cap1.add_run("Gambar 1. Tangkapan Layar Progres Entri Kuesioner INTI SERUTI TW III 2026 (280 Dokumen Clean / 100%)")
+    r_c1.font.name = "Arial"; r_c1.font.size = Pt(9); r_c1.font.italic = True
+
+if os.path.exists(IMG_MAK):
+    p_img2 = doc.add_paragraph()
+    p_img2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_img2.paragraph_format.space_before = Pt(4)
+    p_img2.paragraph_format.space_after = Pt(2)
+    p_img2.add_run().add_picture(IMG_MAK, width=Inches(6.2))
+    
+    p_cap2 = doc.add_paragraph()
+    p_cap2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_cap2.paragraph_format.space_before = Pt(0)
+    p_cap2.paragraph_format.space_after = Pt(8)
+    r_c2 = p_cap2.add_run("Gambar 2. Tangkapan Layar Progres Entri Kuesioner MAK SERUTI TW III 2026 (280 Dokumen Clean / 100%)")
+    r_c2.font.name = "Arial"; r_c2.font.size = Pt(9); r_c2.font.italic = True
+
+doc.save(OUTPUT_DOCX)
+print(f"DOCX created successfully at: {OUTPUT_DOCX} (Size: {os.path.getsize(OUTPUT_DOCX)} bytes)")

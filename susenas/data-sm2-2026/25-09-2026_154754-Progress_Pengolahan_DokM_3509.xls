@@ -1,0 +1,355 @@
+<table border="2px"><tr>
+                    <th rowspan="2">No</th>
+                    <th rowspan="2" style="text-align:left;">Wilayah</th>
+                    <th rowspan="2">Target</th>
+                    <th colspan="2">Clean</th>
+                    <th colspan="2">Error</th>
+                </tr>
+                    <th style="top: 36.7031px;">Jumlah</th>
+                    <th style="top: 36.7031px;">Persentase</th>
+                    <th style="top: 36.7031px;">Jumlah</th>
+                    <th style="top: 36.7031px;">Persentase</th>
+                </tr>
+                    <td class="kode">1</td>
+                    <td>
+                                                
+                            (350900327) 00327                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">2</td>
+                    <td>
+                                                
+                            (350900407) 00407                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">3</td>
+                    <td>
+                                                
+                            (350900445) 00445                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">4</td>
+                    <td>
+                                                
+                            (350901356) 01356                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">5</td>
+                    <td>
+                                                
+                            (350901692) 01692                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">6</td>
+                    <td>
+                                                
+                            (350902185) 02185                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">1</td>
+                    <td class="num" style="color:#16a34a;">10,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">9</td>
+                    <td class="num" style="color:#dc2626;">90,00%</td>
+                </tr>
+                    <td class="kode">7</td>
+                    <td>
+                                                
+                            (350903125) 03125                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">8</td>
+                    <td>
+                                                
+                            (350903376) 03376                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">9</td>
+                    <td>
+                                                
+                            (350904098) 04098                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">10</td>
+                    <td>
+                                                
+                            (350904167) 04167                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">11</td>
+                    <td>
+                                                
+                            (350904592) 04592                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">4</td>
+                    <td class="num" style="color:#16a34a;">40,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">6</td>
+                    <td class="num" style="color:#dc2626;">60,00%</td>
+                </tr>
+                    <td class="kode">12</td>
+                    <td>
+                                                
+                            (350950536) 50536                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">13</td>
+                    <td>
+                                                
+                            (350951611) 51611                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">14</td>
+                    <td>
+                                                
+                            (350951797) 51797                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">15</td>
+                    <td>
+                                                
+                            (350952097) 52097                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">16</td>
+                    <td>
+                                                
+                            (350952471) 52471                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">17</td>
+                    <td>
+                                                
+                            (350953400) 53400                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">18</td>
+                    <td>
+                                                
+                            (350954904) 54904                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">1</td>
+                    <td class="num" style="color:#16a34a;">10,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">1</td>
+                    <td class="num" style="color:#dc2626;">10,00%</td>
+                </tr>
+                    <td class="kode">19</td>
+                    <td>
+                                                
+                            (350955394) 55394                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">20</td>
+                    <td>
+                                                
+                            (350956326) 56326                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">21</td>
+                    <td>
+                                                
+                            (350956361) 56361                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">22</td>
+                    <td>
+                                                
+                            (350956901) 56901                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">7</td>
+                    <td class="num" style="color:#dc2626;">70,00%</td>
+                </tr>
+                    <td class="kode">23</td>
+                    <td>
+                                                
+                            (350957672) 57672                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">24</td>
+                    <td>
+                                                
+                            (350958988) 58988                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">25</td>
+                    <td>
+                                                
+                            (350959905) 59905                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">26</td>
+                    <td>
+                                                
+                            (350960488) 60488                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">2</td>
+                    <td class="num" style="color:#16a34a;">20,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">8</td>
+                    <td class="num" style="color:#dc2626;">80,00%</td>
+                </tr>
+                    <td class="kode">27</td>
+                    <td>
+                                                
+                            (350960552) 60552                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td class="kode">28</td>
+                    <td>
+                                                
+                            (350961110) 61110                            
+                        
+                                            </td>
+                    <td class="num" style="background:#fecdd3;">10</td>
+                    <td class="num" style="color:#16a34a; font-weight:600;">0</td>
+                    <td class="num" style="color:#16a34a;">0,00%</td>
+                    <td class="num" style="color:#dc2626; font-weight:600;">10</td>
+                    <td class="num" style="color:#dc2626;">100,00%</td>
+                </tr>
+                    <td colspan="2" style="text-align:left; letter-spacing:0.5px;">TOTAL</td>
+                    <td class="num" style="background:#fecdd3;">280</td>
+                    <td class="num" style="color:#16a34a;">8</td>
+                    <td class="num" style="color:#16a34a;">2,86%</td>
+                    <td class="num" style="color:#dc2626;">261</td>
+                    <td class="num" style="color:#dc2626;">93,21%</td>
+                </tr></table>
